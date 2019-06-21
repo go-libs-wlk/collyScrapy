@@ -2,3 +2,4 @@
 /ad
 .DS_Store
 /.idea
+/conf/*.conf
