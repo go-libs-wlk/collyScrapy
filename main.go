@@ -31,7 +31,12 @@ func main() {
 	//	go logic.Start()
 	//}
 	//go logic.StartDownloadVideo()
-	//
+
 	//go logic.StartTrans()
+	var video models.Video
+	video.Id = 1
+	video.VideoDir = "100"
+	video.Num = "1111111"
+	video.SetVideoStatus(models.VideoWaitTrans, "video_dir", "num")
 	beego.Run()
 }

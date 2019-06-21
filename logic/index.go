@@ -148,7 +148,8 @@ func forDownloadVideo(num int, video *models.Video, err error) {
 
 	video.VideoDir = filepath.Base(dirPath)
 	video.Num = videoNum
-	video.SetVideoStatus(models.VideoWaitTrans, "video_dir", "num")
+	video.Label = videoUrl.Label
+	video.SetVideoStatus(models.VideoWaitTrans, "video_dir", "num", "label")
 	time.Sleep(1 * time.Minute)
 	forDownloadVideo(1, nil, err)
 }
@@ -156,6 +157,7 @@ func forDownloadVideo(num int, video *models.Video, err error) {
 func GetVideoSaveDir()  (newDir string, err error) {
 	path := beego.AppConfig.String("video_path")
 	lastDir := lib.DirGetLastDirByNumberName(path)
+	lib.DirCheckOrCreate(lastDir)
 	dirNum, err := lib.DirGetDirNumber(lastDir)
 	if err != nil {
 		return
@@ -171,6 +173,8 @@ func GetVideoSaveDir()  (newDir string, err error) {
 		if err != nil {
 			return
 		}
+	} else {
+		newDir = lastDir
 	}
 	return
 }
@@ -251,13 +255,18 @@ func GetVideoRealUrl(iframeUrl string) (videoRealUrl DataObject, err error) {
 	}
 
 	// 获取720P地址
-	num := len(videoUrl.Data)
 	beego.Info("获取的视频地址：", fmt.Sprintf("%+v", videoUrl))
-	if num >= 3 {
-		videoRealUrl = videoUrl.Data[2]
-	} else {
-		videoRealUrl = videoUrl.Data[num - 1]
+	var p = []string{"720", "480", "360", "1080"}
+
+	for _, v := range p {
+		for i, vv := range videoUrl.Data {
+			if strings.Contains(vv.Label, v) {
+				videoRealUrl = videoUrl.Data[i]
+				goto RET
+			}
+		}
 	}
+	RET:
 	return
 }
 

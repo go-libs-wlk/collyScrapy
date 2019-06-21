@@ -102,7 +102,7 @@ func conactAdVideo(videoFile string)  (error, string, string) {
 func transcode(srcvideo string) (error, string, string) {
 	logo := beego.AppConfig.String("logo")
 	outFile := getWaiterVideoFile(srcvideo)
-	commad := "ffmpeg -i " + srcvideo +" -movflags +faststart -r 25 -g 50 -crf 28 -me_method hex -trellis 0 -bf 8 -acodec aac -strict -2 -ar 44100 -ab 128k -vf \"movie=" + logo + "[watermark];[in][watermark] overlay=main_w-overlay_w-10:10[out]\" -s 1280:720 " + outFile
+	commad := "ffmpeg -i " + srcvideo +" -movflags +faststart -r 25 -g 50 -crf 28 -me_method hex -trellis 0 -bf 8 -acodec aac -strict -2 -ar 44100 -ab 128k -vf \"movie=" + logo + "[watermark];[in][watermark]overlay=main_w-overlay_w-10:10[out]\" -s 1280:720 " + outFile
 	return ExecShell(commad)
 }
 
