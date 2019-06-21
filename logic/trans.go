@@ -130,7 +130,7 @@ func ExecShell(command string) (error, string, string) {
 	var stderr bytes.Buffer
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
-		cmd = exec.Command("bash", "-c", command)
+		cmd = exec.Command("cmd", "/C", command)
 	} else {
 		cmd = exec.Command("bash", "-c", command)
 	}
