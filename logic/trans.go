@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -102,7 +103,7 @@ func conactAdVideo(videoFile string)  (error, string, string) {
 func transcode(srcvideo string) (error, string, string) {
 	logo := beego.AppConfig.String("logo")
 	outFile := getWaiterVideoFile(srcvideo)
-	commad := "ffmpeg -i " + srcvideo +" -movflags +faststart -r 25 -g 50 -crf 28 -me_method hex -trellis 0 -bf 8 -acodec aac -strict -2 -ar 44100 -ab 128k -vf \"movie=" + logo + "[watermark];[in][watermark]overlay=main_w-overlay_w-10:10[out]\" -s 1280:720 " + outFile
+	commad := "ffmpeg -y -i " + srcvideo +" -movflags +faststart -r 25 -g 50 -crf 28 -me_method hex -trellis 0 -bf 8 -acodec aac -strict -2 -ar 44100 -ab 128k -vf \"movie=" + logo + "[watermark];[in][watermark]overlay=main_w-overlay_w-10:10[out]\" -s 1280:720 " + outFile
 	return ExecShell(commad)
 }
 
@@ -127,7 +128,12 @@ func getVideoFile(video *models.Video) (videoFile string, err error){
 func ExecShell(command string) (error, string, string) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	cmd := exec.Command("bash", "-c", command)
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("bash", "-c", command)
+	} else {
+		cmd = exec.Command("bash", "-c", command)
+	}
 	// 输出转码命令
 	beego.Info("执行命令：", command)
 	cmd.Stdout = &stdout
