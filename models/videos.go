@@ -44,10 +44,10 @@ func VideoAddPageUrl(url string) (id int64, err error)  {
 }
 
 // 获取待下载的视频信息
-func GetVideoWaitDownload() (video *Video, full bool)  {
+func GetVideoWaitDownload() (*Video, bool)  {
 	server ,_ := beego.AppConfig.Int("server")
 	videoDefaultNum := beego.AppConfig.DefaultInt64("video_num", 0)
-
+	var video Video
 	o := orm.NewOrm()
 	num, _ := o.QueryTable(new(Video)).Filter("server_num", server).Count()
 	if num >= videoDefaultNum {
@@ -64,7 +64,7 @@ func GetVideoWaitDownload() (video *Video, full bool)  {
 	video.ServerNum = server
 	video.Status = VideoDownloading
 	o.Update(&video, "server_num", "status")
-	return video, false
+	return &video, false
 }
 
 func (v *Video)SetVideoStatus(status uint8, cols ... string) (int64, error) {
