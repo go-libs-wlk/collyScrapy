@@ -21,22 +21,20 @@ func init() {
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	//设置默认数据库
 	orm.RegisterDataBase("default", "mysql", mysqlConnection, 30)
-	orm.RegisterModel(new(models.Video))
+	orm.RegisterModel(new(models.Video), new(models.Server))
 	orm.RunSyncdb("default", false, true)
+	//orm.Debug = true
 }
 
 func main() {
 
-	//if f, _ := beego.AppConfig.Bool("is_main"); f {
-	//	go logic.Start()
-	//}
-	//go logic.StartDownloadVideo()
+	if f, _ := beego.AppConfig.Bool("is_main"); f {
+		go logic.Start()
+	}
+
+	go logic.StartDownloadVideo()
 
 	go logic.StartTrans()
-	//var video models.Video
-	//video.Id = 1
-	//video.VideoDir = "100"
-	//video.Num = "1111111"
-	//video.SetVideoStatus(models.VideoWaitTrans, "video_dir", "num")
+
 	beego.Run()
 }

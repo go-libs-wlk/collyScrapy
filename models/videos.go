@@ -13,7 +13,10 @@ const (
 	VideoTransing
 	VideoDownloadFail
 	VideoTransFail
+	VideoUploading
+	VideoUploadFail
 	VideoOk
+
 )
 
 type Video struct {

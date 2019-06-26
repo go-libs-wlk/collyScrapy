@@ -63,22 +63,45 @@ func forTrans()  {
 	}
 
 	// 拼接广告头
-	err, stdout, stderr = conactAdVideo(videoFile)
+	err, stdout, stderr, outFile := conactAdVideo(videoFile)
 	if err != nil {
 		beego.Error(err,stdout,stderr)
 		video.ErrMsg = "转码加水印" + err.Error() + "\n" + stdout + "\n" + stderr
 		video.SetVideoStatus(models.VideoTransFail, "err_msg")
 		forTrans()
 	}
-	video.SetVideoStatus(models.VideoOk)
+	video.SetVideoStatus(models.VideoUploading)
+	// 上传至种源
+	server, err := models.GetServer()
+	if err != nil {
+		video.ErrMsg = "找不到种源服务器：" + err.Error()
+		video.SetVideoStatus(models.VideoUploadFail, "err_msg")
+		return
+	}
+
 	// 清楚垃圾文件
 	os.Remove(getWaiterVideoFile(videoFile))
 	os.Remove(videoFile)
 	os.Remove(filepath.Dir(videoFile) + string(os.PathSeparator) + "files.txt")
+
+	err = filepath.Walk(filepath.Dir(outFile), func(path string, info os.FileInfo, err error) error {
+		fmt.Println(path)
+		if !info.IsDir() {
+			return UploadFile(server, path, video.Num)
+		}
+		return nil
+	})
+
+	if err == nil {
+		video.SetVideoStatus(models.VideoOk)
+	} else {
+		video.ErrMsg = err.Error()
+		video.SetVideoStatus(models.VideoUploadFail, "err_msg")
+	}
 	forTrans()
 }
 
-func conactAdVideo(videoFile string)  (error, string, string) {
+func conactAdVideo(videoFile string)  (err error, outStr, outErr, outFile string) {
 	adVideoFile := beego.AppConfig.String("video_ad") + string(os.PathSeparator) + "ad.mp4"
 	waterVideoFile := getWaiterVideoFile(videoFile)
 	dir := filepath.Dir(videoFile)
@@ -86,18 +109,19 @@ func conactAdVideo(videoFile string)  (error, string, string) {
 	var file *os.File
 
 	filePathTxt := dir + string(os.PathSeparator) + "files.txt"
-	file, err := os.OpenFile(filePathTxt, os.O_CREATE|os.O_TRUNC|os.O_RDWR, os.ModePerm)
+	file, err = os.OpenFile(filePathTxt, os.O_CREATE|os.O_TRUNC|os.O_RDWR, os.ModePerm)
 	if err != nil {
 		beego.Error("创建写入拼接文件错误", err.Error())
-		return err, "", ""
+		return
 	}
 	defer file.Close()
 
 	file.WriteString("file '" + strings.TrimSpace(adVideoFile) + "'\n")
 	file.WriteString("file '" + strings.TrimSpace(waterVideoFile) + "'\n")
-
-	command := "ffmpeg -f concat -safe 0 -i " + filePathTxt + " -c copy " + dir + string(os.PathSeparator) + domain + filepath.Base(videoFile)
-	return ExecShell(command)
+	outFile = dir + string(os.PathSeparator) + domain + filepath.Base(videoFile)
+	command := "ffmpeg -y -f concat -safe 0 -i " + filePathTxt + " -c copy " + outFile
+	err, outStr, outErr = ExecShell(command)
+	return
 }
 
 func transcode(srcvideo string) (error, string, string) {
@@ -125,12 +149,14 @@ func getVideoFile(video *models.Video) (videoFile string, err error){
 }
 
 // 执行Shell 命令
-func ExecShell(command string) (error, string, string) {
+func ExecShell(command string) (err error, out, errMsg string) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
-		cmd = exec.Command("cmd", "/C", command)
+		command = "/C " + command
+		args := strings.Split(command, " ")
+		cmd = exec.Command("cmd", args...)
 	} else {
 		cmd = exec.Command("bash", "-c", command)
 	}
@@ -138,6 +164,8 @@ func ExecShell(command string) (error, string, string) {
 	beego.Info("执行命令：", command)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	err := cmd.Run()
-	return err, stdout.String(), stderr.String()
+	out = stdout.String()
+	errMsg = stderr.String()
+	err = cmd.Run()
+	return
 }
