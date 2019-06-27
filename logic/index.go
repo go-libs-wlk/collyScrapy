@@ -143,15 +143,6 @@ func forDownloadVideo(num int, video *models.Video, err error) {
 		forDownloadVideo(1, nil, nil)
 	}
 
-	if err != nil {
-		beego.Error(err)
-		num++
-		time.Sleep(10 * time.Second)
-		forDownloadVideo(num, video, err)
-	}
-
-
-
 	videoUrl, err := GetVideoRealUrl(iframe)
 	if err != nil {
 		beego.Error(err)
