@@ -21,7 +21,7 @@ var (
 	baseDir string = "/videos"
 )
 
-func UploadFile(server *models.Server, srcPath , videoNum string) (err error) {
+func UploadFile(server *models.Server, srcPath []string, videoNum string) (err error) {
 	var (
 		ftpHandle *goftp.FTP
 		path string
@@ -47,23 +47,24 @@ func UploadFile(server *models.Server, srcPath , videoNum string) (err error) {
 		_ = ftpHandle.Mkd(path)
 	}
 
-	if num >= 1 {
+	if num >= 10 {
 		lastName , _ := strconv.Atoi(filepath.Base(path))
 		path = baseDir + "/" + strconv.Itoa(lastName + 1)
 		_ = ftpHandle.Mkd(path)
 	}
 
 	var file *os.File
-	if file, err = os.Open(srcPath); err != nil {
-		return
-	}
-	videoBasePath := path + "/" + videoNum
-	ftpHandle.Mkd(videoBasePath)
-	if err = ftpHandle.Stor(videoBasePath + "/" + filepath.Base(srcPath),file); err != nil {
-		return
+	for _, fileSrcPath := range srcPath{
+		if file, err = os.Open(fileSrcPath); err != nil {
+			return
+		}
+		videoBasePath := path + "/" + videoNum
+		ftpHandle.Mkd(videoBasePath)
+		if err = ftpHandle.Stor(videoBasePath + "/" + filepath.Base(fileSrcPath),file); err != nil {
+			return
+		}
 	}
 	defer file.Close()
-
 	server.VideoNum = server.VideoNum + 1
 	server.UpdateVideoNum()
 	return

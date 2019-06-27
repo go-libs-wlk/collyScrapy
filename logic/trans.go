@@ -84,13 +84,15 @@ func forTrans()  {
 	os.Remove(videoFile)
 	os.Remove(filepath.Dir(videoFile) + string(os.PathSeparator) + "files.txt")
 
+	var filesNeedUpload []string
 	err = filepath.Walk(filepath.Dir(outFile), func(path string, info os.FileInfo, err error) error {
-		fmt.Println(path)
 		if !info.IsDir() {
-			return UploadFile(server, path, video.Num)
+			filesNeedUpload = append(filesNeedUpload, path)
 		}
 		return nil
 	})
+
+	err = UploadFile(server, filesNeedUpload, video.Num)
 
 	if err == nil {
 		video.SetVideoStatus(models.VideoOk)

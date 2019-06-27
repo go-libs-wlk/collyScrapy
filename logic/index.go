@@ -114,12 +114,23 @@ func forDownloadVideo(num int, video *models.Video, err error) {
 	beego.Error("开始下载文件：", fmt.Sprintf("%+v", video))
 
 	iframe, videoNum, err := GetIframeUrl(video.Iframe)
+
+	// 检测该视频是否被发布出去在香蕉视频
+	err = models.VideoNumFind(videoNum)
+	if err == nil {
+		video.Num = videoNum
+		video.SetVideoStatus(models.VideoOk, "num")
+		forDownloadVideo(1, nil, nil)
+	}
+
 	if err != nil {
 		beego.Error(err)
 		num++
 		time.Sleep(10 * time.Second)
 		forDownloadVideo(num, video, err)
 	}
+
+
 
 	videoUrl, err := GetVideoRealUrl(iframe)
 	if err != nil {

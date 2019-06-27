@@ -11,6 +11,7 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/robertkrimen/otto v0.0.0-20180617131154-15f95af6e78d // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
+	github.com/urfave/cli v1.20.0
 	google.golang.org/appengine v1.6.1 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
