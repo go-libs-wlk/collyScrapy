@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strconv"
 )
 
 func init() {
@@ -29,6 +30,8 @@ func init() {
 	orm.RunSyncdb("default", false, true)
 	//orm.Debug = true
 }
+
+
 
 func main() {
 
@@ -61,6 +64,13 @@ func main() {
 			Aliases: []string{"jav"},
 			Usage:   "采集javcl.com站列表页链接，存入数据库",
 			Action:  func(c *cli.Context) error {
+				if "" != c.Args().First() {
+					m, err := strconv.Atoi(c.Args().First())
+					if err != nil {
+						return err
+					}
+					logic.MaxPageNum = m
+				}
 				beego.Info("开始采集javcl页面链接")
 				logic.Start()
 				return nil

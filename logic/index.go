@@ -17,9 +17,13 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
+
+var MaxPageNum = 0
 
 func Start() {
 	domain := "https://javcl.com/"
@@ -74,11 +78,27 @@ func Index(url string) bool {
 
 	time.Sleep(3 * time.Second)
 	// 获取下一页地址
-	str, ok := doc.Find(".pagination .active").Next().Find("a").Attr("href")
-	if !ok {
-		return false
+	var baseUrl = "https://javcl.com/page/"
+	if 0 < MaxPageNum {
+		reg := regexp.MustCompile(`\/([\d]+)\/`)
+		s := reg.FindStringSubmatch(url)
+		if len(s) == 0 {
+			url = baseUrl + "2/"
+		} else {
+			pageNum, err := strconv.Atoi(s[1])
+			if err != nil {
+				return false
+			}
+			url = baseUrl + strconv.Itoa(pageNum + 1) + "/"
+		}
+	} else {
+		var ok bool
+		url, ok = doc.Find(".pagination .active").Next().Find("a").Attr("href")
+		if !ok {
+			return false
+		}
 	}
-	return Index(str)
+	return Index(url)
 }
 
 func StartDownloadVideo() {
