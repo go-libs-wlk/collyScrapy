@@ -98,3 +98,16 @@ func GetVideoById(id int64) *Video {
 	return &video
 }
 
+
+func GetVideoUploadFail() *Video {
+	var video Video
+	server ,_ := beego.AppConfig.Int("server")
+	o := orm.NewOrm()
+	_ = o.QueryTable(new(Video)).Filter("status", VideoUploadFail).Filter("server_num",server).OrderBy("-id").One(&video)
+	if video.Id == 0 {
+		beego.Info("暂时无上传失败的视频 休息十分钟")
+		time.Sleep(10 * time.Minute)
+		return GetVideoWaitTrans()
+	}
+	return  &video
+}

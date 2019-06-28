@@ -34,12 +34,7 @@ func init() {
 
 
 func main() {
-
-
-
-
 	app := cli.NewApp()
-
 	app.Commands = []cli.Command{
 		{
 			Name:    "xjbbs",
@@ -89,6 +84,16 @@ func main() {
 				go logic.StartDownloadVideo()
 				go logic.StartTrans()
 				select {}
+			},
+		},
+		{
+			Name:    "upload",
+			Aliases: []string{"u"},
+			Usage:   "上传ftp",
+			Action:  func(c *cli.Context) error {
+				beego.Info("上传ftp")
+				logic.UploadVideo()
+				return nil
 			},
 		},
 	}

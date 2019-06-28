@@ -3,6 +3,7 @@ package logic
 import (
 	"collyScrapy/models"
 	"fmt"
+	"github.com/astaxie/beego"
 	"github.com/dutchcoders/goftp"
 	"os"
 	"path/filepath"
@@ -20,6 +21,46 @@ type Fpt struct {
 var (
 	baseDir string = "/videos"
 )
+
+func UploadVideo() {
+	video := models.GetVideoUploadFail()
+	// 获取video的文件地址
+	videoFile, err := getVideoFile(video)
+	// 上传至种源
+	server, err := models.GetServer()
+	if err != nil {
+		video.ErrMsg = "找不到种源服务器：" + err.Error()
+		video.SetVideoStatus(models.VideoUploadFail, "err_msg")
+		return
+	}
+	domain := beego.AppConfig.String("domain")
+	dir := filepath.Dir(videoFile)
+	outFile := dir + string(os.PathSeparator) + domain + filepath.Base(videoFile)
+
+	// 清楚垃圾文件
+	os.Remove(getWaiterVideoFile(videoFile))
+	os.Remove(videoFile)
+	os.Remove(filepath.Dir(videoFile) + string(os.PathSeparator) + "files.txt")
+
+	var filesNeedUpload []string
+	err = filepath.Walk(filepath.Dir(outFile), func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			filesNeedUpload = append(filesNeedUpload, path)
+		}
+		return nil
+	})
+
+	err = UploadFile(server, filesNeedUpload, video.Num)
+
+	if err == nil {
+		video.SetVideoStatus(models.VideoOk)
+	} else {
+		video.ErrMsg = err.Error()
+		video.SetVideoStatus(models.VideoUploadFail, "err_msg")
+	}
+}
+
+
 
 func UploadFile(server *models.Server, srcPath []string, videoNum string) (err error) {
 	var (
