@@ -51,6 +51,7 @@ func GetVideoWaitDownload() (*Video, bool)  {
 	o := orm.NewOrm()
 	num, _ := o.QueryTable(new(Video)).Filter("server_num", server).Count()
 	if num >= videoDefaultNum {
+		beego.Info("视频已经超出，database_video_num=" , num, ". 默认设置 video_num = ", videoDefaultNum)
 		return nil, true
 	}
 
