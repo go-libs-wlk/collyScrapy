@@ -41,6 +41,7 @@ func UploadVideo() {
 	os.Remove(getWaiterVideoFile(videoFile))
 	os.Remove(videoFile)
 	os.Remove(filepath.Dir(videoFile) + string(os.PathSeparator) + "files.txt")
+	os.Remove(filepath.Dir(videoFile) + string(os.PathSeparator) + "ad.mp4")
 
 	var filesNeedUpload []string
 	err = filepath.Walk(filepath.Dir(outFile), func(path string, info os.FileInfo, err error) error {
@@ -54,6 +55,7 @@ func UploadVideo() {
 
 	if err == nil {
 		video.SetVideoStatus(models.VideoOk)
+		UploadVideo()
 	} else {
 		video.ErrMsg = err.Error()
 		video.SetVideoStatus(models.VideoUploadFail, "err_msg")
