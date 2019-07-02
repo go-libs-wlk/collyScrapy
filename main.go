@@ -96,6 +96,16 @@ func main() {
 				return nil
 			},
 		},
+		{
+			Name: 	"delete",
+			Aliases: []string{"d"},
+			Usage:   "删除失败文件, 仅针对配置重复server——id 进行处理",
+			Action:  func(c *cli.Context) error {
+				beego.Info("删除失败文件")
+				logic.DeleteDir()
+				return nil
+			},
+		},
 	}
 
 	sort.Sort(cli.FlagsByName(app.Flags))
