@@ -24,6 +24,7 @@ var (
 
 func UploadVideo() {
 	video := models.GetVideoUploadFail()
+	beego.Info("需要上传的视频：", fmt.Sprintf("%+v \n", video))
 	// 获取video的文件地址
 	videoFile, err := getVideoFile(video)
 	if err != nil {
