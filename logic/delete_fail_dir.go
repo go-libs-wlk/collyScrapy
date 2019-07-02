@@ -2,8 +2,8 @@ package logic
 
 import (
 	"collyScrapy/models"
-	"fmt"
 	"github.com/astaxie/beego"
+	"os"
 	"path/filepath"
 )
 
@@ -17,7 +17,6 @@ func DeleteDir()  {
 	}
 	beego.Error("共有", len(videos) , "个文件需要删除")
 	for _, v := range videos {
-		fmt.Printf("%+v \n", v)
 		if v.VideoDir != "" {
 			path, err := getVideoFile(v)
 			if err != nil {
@@ -25,8 +24,8 @@ func DeleteDir()  {
 				continue
 			}
 			beego.Info("删除文件:",path, " 所在的目录：", filepath.Dir(path))
-			//return
-			//os.RemoveAll(filepath.Dir(path))
+			os.RemoveAll(filepath.Dir(path))
+			return
 		}
 	}
 
