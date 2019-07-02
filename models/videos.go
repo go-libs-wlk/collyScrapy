@@ -115,7 +115,7 @@ func GetVideoUploadFail() *Video {
 func GetAllVideoWait(serverId string) ([]*Video, error) {
 	o := orm.NewOrm()
 	var videos []*Video
-	_, err := o.QueryTable(new(Video)).Filter("status", VideoWait).Filter("server", serverId).All(&videos)
+	_, err := o.QueryTable(new(Video)).Filter("status", VideoWait).Filter("server_num", serverId).All(&videos)
 	if err != nil {
 		return videos, err
 	}
