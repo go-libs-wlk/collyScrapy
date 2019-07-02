@@ -16,7 +16,7 @@ const (
 	VideoUploading
 	VideoUploadFail
 	VideoOk
-
+	VideoFileNotFound
 )
 
 type Video struct {

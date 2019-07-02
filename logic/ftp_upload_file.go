@@ -29,8 +29,8 @@ func UploadVideo() {
 	videoFile, err := getVideoFile(video)
 	if err != nil {
 		video.ErrMsg = "找不到视频文件：" + err.Error()
-		video.SetVideoStatus(models.VideoUploadFail, "err_msg")
-		return
+		video.SetVideoStatus(models.VideoFileNotFound, "err_msg")
+		UploadVideo()
 	}
 	beego.Info("开始上传文件：", videoFile)
 	// 上传至种源
