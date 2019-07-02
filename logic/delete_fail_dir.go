@@ -9,13 +9,13 @@ import (
 
 func DeleteDir()  {
 	server := beego.AppConfig.String("server")
-
+	beego.Error("开始删除")
 	videos , err := models.GetAllVideoWait(server)
 	if err != nil {
 		beego.Error(err.Error())
 		return
 	}
-
+	beego.Error("共有", len(videos) , "个文件需要删除")
 	for _, v := range videos {
 		fmt.Printf("%+v \n", v)
 		if v.VideoDir != "" {
