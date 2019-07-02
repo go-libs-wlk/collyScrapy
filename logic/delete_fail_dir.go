@@ -25,7 +25,6 @@ func DeleteDir()  {
 			}
 			beego.Info("删除文件:",path, " 所在的目录：", filepath.Dir(path))
 			os.RemoveAll(filepath.Dir(path))
-			return
 		}
 	}
 
