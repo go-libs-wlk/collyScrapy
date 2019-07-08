@@ -29,3 +29,26 @@ func DeleteDir()  {
 	}
 
 }
+
+func DeleteOkVideoDir()  {
+	server := beego.AppConfig.String("server")
+	beego.Error("开始删除")
+	videos , err := models.GetAllVideoOK(server)
+	if err != nil {
+		beego.Error(err.Error())
+		return
+	}
+	beego.Error("共有", len(videos) , "个文件需要删除")
+	for _, v := range videos {
+		if v.VideoDir != "" {
+			path, err := getVideoFile(v)
+			if err != nil {
+				beego.Error(err.Error())
+				continue
+			}
+			beego.Info("删除文件:",path, " 所在的目录：", filepath.Dir(path))
+			os.RemoveAll(filepath.Dir(path))
+		}
+	}
+
+}

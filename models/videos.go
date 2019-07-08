@@ -7,16 +7,16 @@ import (
 )
 
 const (
-	VideoWait = iota + 1
-	VideoDownloading
-	VideoWaitTrans
-	VideoTransing
-	VideoDownloadFail
-	VideoTransFail
-	VideoUploading
-	VideoUploadFail
-	VideoOk
-	VideoFileNotFound
+	VideoWait         = iota + 1 // 1
+	VideoDownloading             // 2
+	VideoWaitTrans               // 3
+	VideoTransing                //4
+	VideoDownloadFail            // 5
+	VideoTransFail               //6
+	VideoUploading               //7
+	VideoUploadFail              //8
+	VideoOk                      //9
+	VideoFileNotFound            // 10
 )
 
 type Video struct {
@@ -25,13 +25,13 @@ type Video struct {
 	Num       string // 车牌号
 	Status    uint8  // 1 待下载 2 已下载 3 待转吗 4 已转码 5 下载失败 6 转码失败
 	ServerNum int    // 服务器编号
-	Label string
-	ErrMsg string
-	VideoDir string
+	Label     string
+	ErrMsg    string
+	VideoDir  string
 	CreatedAt int64
 }
 
-func VideoAddPageUrl(url string) (id int64, err error)  {
+func VideoAddPageUrl(url string) (id int64, err error) {
 	o := orm.NewOrm()
 	var video Video
 	video.Status = VideoWait
@@ -44,14 +44,14 @@ func VideoAddPageUrl(url string) (id int64, err error)  {
 }
 
 // 获取待下载的视频信息
-func GetVideoWaitDownload() (*Video, bool)  {
-	server ,_ := beego.AppConfig.Int("server")
+func GetVideoWaitDownload() (*Video, bool) {
+	server, _ := beego.AppConfig.Int("server")
 	videoDefaultNum := beego.AppConfig.DefaultInt64("video_num", 0)
 	var video Video
 	o := orm.NewOrm()
 	num, _ := o.QueryTable(new(Video)).Filter("server_num", server).Count()
 	if num >= videoDefaultNum {
-		beego.Info("视频已经超出，database_video_num=" , num, ". 默认设置 video_num = ", videoDefaultNum)
+		beego.Info("视频已经超出，database_video_num=", num, ". 默认设置 video_num = ", videoDefaultNum)
 		return nil, true
 	}
 
@@ -68,7 +68,7 @@ func GetVideoWaitDownload() (*Video, bool)  {
 	return &video, false
 }
 
-func (v *Video)SetVideoStatus(status uint8, cols ... string) (int64, error) {
+func (v *Video) SetVideoStatus(status uint8, cols ...string) (int64, error) {
 	o := orm.NewOrm()
 	v.Status = status
 	cols = append(cols, "status")
@@ -77,9 +77,9 @@ func (v *Video)SetVideoStatus(status uint8, cols ... string) (int64, error) {
 
 func GetVideoWaitTrans() *Video {
 	var video Video
-	server ,_ := beego.AppConfig.Int("server")
+	server, _ := beego.AppConfig.Int("server")
 	o := orm.NewOrm()
-	_ = o.QueryTable(new(Video)).Filter("status", VideoWaitTrans).Filter("server_num",server).OrderBy("-id").One(&video)
+	_ = o.QueryTable(new(Video)).Filter("status", VideoWaitTrans).Filter("server_num", server).OrderBy("-id").One(&video)
 	if video.Id == 0 {
 		beego.Info("暂时无可转码的视频 休息十分钟")
 		time.Sleep(10 * time.Minute)
@@ -87,29 +87,28 @@ func GetVideoWaitTrans() *Video {
 	}
 	video.Status = VideoTransing
 	o.Update(&video, "status")
-	return  &video
+	return &video
 }
 
 func GetVideoById(id int64) *Video {
-	var video  Video
+	var video Video
 	o := orm.NewOrm()
 	video.Id = id
 	o.Read(&video)
 	return &video
 }
 
-
 func GetVideoUploadFail() *Video {
 	var video Video
-	server ,_ := beego.AppConfig.Int("server")
+	server, _ := beego.AppConfig.Int("server")
 	o := orm.NewOrm()
-	_ = o.QueryTable(new(Video)).Filter("status", VideoUploadFail).Filter("server_num",server).OrderBy("-id").One(&video)
+	_ = o.QueryTable(new(Video)).Filter("status", VideoUploadFail).Filter("server_num", server).OrderBy("-id").One(&video)
 	if video.Id == 0 {
 		beego.Info("暂时无上传失败的视频 休息十分钟")
 		time.Sleep(10 * time.Minute)
 		return GetVideoWaitTrans()
 	}
-	return  &video
+	return &video
 }
 
 func GetAllVideoWait(serverId string) ([]*Video, error) {
@@ -117,6 +116,18 @@ func GetAllVideoWait(serverId string) ([]*Video, error) {
 	orm.Debug = true
 	var videos []*Video
 	_, err := o.QueryTable(new(Video)).Filter("status", VideoWait).Filter("server_num", serverId).All(&videos)
+	if err != nil {
+		return videos, err
+	}
+	return videos, nil
+}
+
+
+func GetAllVideoOK(serverId string) ([]*Video, error) {
+	o := orm.NewOrm()
+	orm.Debug = true
+	var videos []*Video
+	_, err := o.QueryTable(new(Video)).Filter("status", VideoOk).Filter("server_num", serverId).All(&videos)
 	if err != nil {
 		return videos, err
 	}

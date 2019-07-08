@@ -98,8 +98,18 @@ func main() {
 		},
 		{
 			Name: 	"delete",
-			Aliases: []string{"d"},
+			Aliases: []string{"del"},
 			Usage:   "删除失败文件, 仅针对配置重复server——id 进行处理",
+			Action:  func(c *cli.Context) error {
+				beego.Info("删除失败文件")
+				logic.DeleteDir()
+				return nil
+			},
+		},
+		{
+			Name: 	"deleteOkVideo",
+			Aliases: []string{"delOkVideoDir"},
+			Usage:   "删除上传成功的视频的原始文件夹",
 			Action:  func(c *cli.Context) error {
 				beego.Info("删除失败文件")
 				logic.DeleteDir()
