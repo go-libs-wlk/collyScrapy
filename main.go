@@ -111,8 +111,8 @@ func main() {
 			Aliases: []string{"delOkVideoDir"},
 			Usage:   "删除上传成功的视频的原始文件夹",
 			Action:  func(c *cli.Context) error {
-				beego.Info("删除失败文件")
-				logic.DeleteDir()
+				beego.Info("删除上传成功的视频的原始文件夹")
+				logic.DeleteOkVideoDir()
 				return nil
 			},
 		},
