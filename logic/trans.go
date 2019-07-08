@@ -96,6 +96,7 @@ func forTrans()  {
 	err = UploadFile(server, filesNeedUpload, video.Num)
 
 	if err == nil {
+		os.RemoveAll(filepath.Dir(videoFile))
 		video.SetVideoStatus(models.VideoOk)
 	} else {
 		video.ErrMsg = err.Error()
