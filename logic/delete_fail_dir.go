@@ -33,7 +33,7 @@ func DeleteDir()  {
 func DeleteOkVideoDir()  {
 	server := beego.AppConfig.String("server")
 	beego.Error("开始删除")
-	videos , err := models.GetAllVideoOK(server)
+	videos , err := models.GetAllVideoOKAndDirNotDel(server)
 	if err != nil {
 		beego.Error(err.Error())
 		return
@@ -48,6 +48,7 @@ func DeleteOkVideoDir()  {
 			//}
 			beego.Info("删除文件:",path, " 所在的目录：", filepath.Dir(path))
 			os.RemoveAll(filepath.Dir(path))
+			v.SetIsDelDirTrue()
 		}
 	}
 

@@ -30,7 +30,7 @@ func StartTrans() {
 
 }
 
-func forTrans()  {
+func forTrans() {
 	video := models.GetVideoWaitTrans()
 	//video := models.GetVideoById(48535) // 测试使用
 	beego.Info("开始处理视频", fmt.Sprintf("%+v", video))

@@ -28,6 +28,7 @@ type Video struct {
 	Label     string
 	ErrMsg    string
 	VideoDir  string
+	IsDelDir  bool	`orm:"default(false)"`
 	CreatedAt int64
 }
 
@@ -113,7 +114,6 @@ func GetVideoUploadFail() *Video {
 
 func GetAllVideoWait(serverId string) ([]*Video, error) {
 	o := orm.NewOrm()
-	orm.Debug = true
 	var videos []*Video
 	_, err := o.QueryTable(new(Video)).Filter("status", VideoWait).Filter("server_num", serverId).All(&videos)
 	if err != nil {
@@ -123,13 +123,18 @@ func GetAllVideoWait(serverId string) ([]*Video, error) {
 }
 
 
-func GetAllVideoOK(serverId string) ([]*Video, error) {
+func GetAllVideoOKAndDirNotDel(serverId string) ([]*Video, error) {
 	o := orm.NewOrm()
-	orm.Debug = true
 	var videos []*Video
-	_, err := o.QueryTable(new(Video)).Filter("status", VideoOk).Filter("server_num", serverId).All(&videos)
+	_, err := o.QueryTable(new(Video)).Filter("status", VideoOk).Filter("server_num", serverId).Filter("is_del_dir",false).All(&videos)
 	if err != nil {
 		return videos, err
 	}
 	return videos, nil
+}
+
+func (v *Video)SetIsDelDirTrue() (int64, error) {
+	o := orm.NewOrm()
+	v.IsDelDir = true
+	return o.Update(v, "is_del_dir")
 }
