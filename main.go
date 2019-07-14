@@ -27,7 +27,7 @@ func init() {
 	//设置默认数据库
 	orm.RegisterDataBase("default", "mysql", mysqlConnection, 30)
 	orm.RegisterModel(new(models.Video), new(models.Server), new(models.VideoNum))
-	orm.RunSyncdb("default", false, true)
+	//orm.RunSyncdb("default", false, true)
 	//orm.Debug = true
 }
 
@@ -111,6 +111,16 @@ func main() {
 			Action:  func(c *cli.Context) error {
 				beego.Info("删除上传成功的视频的原始文件夹")
 				logic.DeleteOkVideoDir()
+				return nil
+			},
+		},
+		{
+			Name: 	"videoTrans",
+			Aliases: []string{"vTrans"},
+			Usage:   "转码，压缩，上传ftp",
+			Action:  func(c *cli.Context) error {
+				beego.Info("视频开始转码")
+				logic.StartTrans()
 				return nil
 			},
 		},
