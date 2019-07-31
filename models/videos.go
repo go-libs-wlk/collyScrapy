@@ -138,3 +138,19 @@ func (v *Video)SetIsDelDirTrue() (int64, error) {
 	v.IsDelDir = true
 	return o.Update(v, "is_del_dir")
 }
+
+func VideoDownloadingToWaitDownload(server int) (num int64, err error) {
+	o := orm.NewOrm()
+	num, err = o.QueryTable(new(Video)).Filter("status", VideoDownloading).Filter("server_num", server).Update(orm.Params{
+		"status" : VideoWait,
+	})
+	return
+}
+
+func VideoTransingToWaitTrans(serverId int) (num int64, err error)  {
+	o := orm.NewOrm()
+	num, err = o.QueryTable(new(Video)).Filter("status", VideoTransing).Filter("server_num", serverId).Update(orm.Params{
+		"status" : VideoWaitTrans,
+	})
+	return
+}

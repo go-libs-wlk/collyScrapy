@@ -32,6 +32,7 @@ func init() {
 }
 
 func main() {
+
 	app := cli.NewApp()
 	app.Commands = []cli.Command{
 		{
@@ -49,6 +50,7 @@ func main() {
 			Aliases: []string{"d"},
 			Usage:   "下载javcl.com视频，转码，压缩，上传ftp",
 			Action:  func(c *cli.Context) error {
+				before()
 				beego.Info("开始下载javcl视频")
 				go logic.StartDownloadVideo()
 				go logic.StartTrans()
@@ -77,6 +79,7 @@ func main() {
 			Aliases: []string{"m"},
 			Usage:   "采集javcl.com站列表页链接，存入数据库,下载视频，转码，压缩，上传ftp",
 			Action:  func(c *cli.Context) error {
+				before()
 				beego.Info("开始采集javcl.com站列表页链接，存入数据库,下载视频，转码，压缩，上传ftp")
 				go logic.Start()
 				go logic.StartDownloadVideo()
@@ -119,6 +122,7 @@ func main() {
 			Aliases: []string{"vTrans"},
 			Usage:   "转码，压缩，上传ftp",
 			Action:  func(c *cli.Context) error {
+				before()
 				beego.Info("视频开始转码")
 				logic.StartTrans()
 				return nil
@@ -132,5 +136,23 @@ func main() {
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func before()  {
+	// 重置各种状态
+	serverId, _ := beego.AppConfig.Int("server")
+	if num, err := models.VideoDownloadingToWaitDownload(serverId); err != nil {
+		beego.Error("重置视频状态：正在下载---》待下载=", err.Error())
+		return
+	} else {
+		beego.Info("重置视频状态：正在下载---》待下载," ,num, "个视频")
+	}
+
+	if num, err := models.VideoTransingToWaitTrans(serverId); err != nil {
+		beego.Error("重置视频状态：正在转码---》待转码=", err.Error())
+		return
+	} else {
+		beego.Info("重置视频状态：正在转码---》待转码," ,num, "个视频")
 	}
 }
